@@ -16,7 +16,7 @@
 package com.example.android.pets;
 
 import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -31,7 +31,6 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.android.pets.data.PetContract;
-import com.example.android.pets.data.PetDbHelper;
 
 /**
  * Allows user to create a new pet or edit an existing one.
@@ -61,9 +60,6 @@ public class EditorActivity extends AppCompatActivity {
         String breedString = mBreedEditText.getText().toString().trim();
         int weight = Integer.parseInt(mWeightEditText.getText().toString().trim());
 
-        PetDbHelper dbHelper = new PetDbHelper(this);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-
 // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
         values.put(PetContract.PetEntry.COLUMN_PET_NAME,  nameString);
@@ -71,14 +67,18 @@ public class EditorActivity extends AppCompatActivity {
         values.put(PetContract.PetEntry.COLUMN_PET_GENDER, weight);
         values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT, mGender);
 
-// Insert the new row, returning the primary key value of the new row
-        try {
-            long newRowId = db.insert(PetContract.PetEntry.TABLE_NAME, null, values);
-            Toast.makeText(this, "Number of row is "+ newRowId, Toast.LENGTH_LONG);
-        }
-        catch (Exception e)
-        {
-            Toast.makeText(this, "Error of iserting database values.", Toast.LENGTH_LONG);
+        Uri newUri = getContentResolver().insert(PetContract.PetEntry.CONTENT_URI, values);
+        // Insert a new pet into the provider, returning the content URI for the new pet.
+
+        // Show a toast message depending on whether or not the insertion was successful
+        if (newUri == null) {
+            // If the new content URI is null, then there was an error with insertion.
+            Toast.makeText(this, getString(R.string.editor_insert_pet_failed),
+                    Toast.LENGTH_SHORT).show();
+        } else {
+            // Otherwise, the insertion was successful and we can display a toast.
+            Toast.makeText(this, getString(R.string.editor_insert_pet_successful),
+                    Toast.LENGTH_SHORT).show();
         }
 
     }

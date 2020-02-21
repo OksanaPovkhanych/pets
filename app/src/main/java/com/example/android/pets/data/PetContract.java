@@ -1,4 +1,5 @@
 package com.example.android.pets.data;
+import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
@@ -22,9 +23,29 @@ public class PetContract {
         public static final String COLUMN_PET_GENDER = "gender";
         public static final String COLUMN_PET_WEIGHT = "weight";
 
+
+        /**
+         * The MIME type of the  for a list of pets.
+         */
+        public static final String CONTENT_LIST_TYPE =
+                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_PETS;
+
+        /**
+         * The MIME type of the  for a single pet.
+         */
+        public static final String CONTENT_ITEM_TYPE =
+                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_PETS;
+
+
         public static final int GENDER_UNKNOWN = 0;
         public static final int GENDER_MALE = 1;
         public static final int GENDER_FEMALE = 2;
 
+        public static boolean isValidGender(Integer gender) {
+            if (gender!=GENDER_FEMALE || gender!= GENDER_MALE|| gender != GENDER_UNKNOWN)
+                return true;
+            else
+                return  false;
+        }
     }
     }
