@@ -52,6 +52,7 @@ public class PetCursorAdapter extends CursorAdapter {
      * @param cursor  The cursor from which to get the data. The cursor is already moved to the
      *                correct row.
      */
+    
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
 // Find fields to populate in inflated template
