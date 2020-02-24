@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 package com.example.android.pets;
+
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.example.android.pets.data.PetContract;
 
@@ -32,12 +38,21 @@ import static com.example.android.pets.data.PetContract.PetEntry.CONTENT_URI;
 /**
  * Displays list of pets that were entered and stored in the app.
  */
-public class CatalogActivity extends AppCompatActivity {
+public class CatalogActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+    private PetCursorAdapter petAdapter;
+    private static  final int PET_LOADER = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalog);
+
+        // Find the ListView which will be populated with the pet data
+        ListView petListView = (ListView) findViewById(R.id.list);
+
+        // Find and set empty view on the ListView, so that it only shows when the list has 0 items.
+        View emptyView = findViewById(R.id.empty_view);
+        petListView.setEmptyView(emptyView);
 
         // Setup FAB to open EditorActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -49,55 +64,14 @@ public class CatalogActivity extends AppCompatActivity {
             }
         });
 
-        displayDatabaseInfo();
-    }
-
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        displayDatabaseInfo();
-    }
-
-    /**
-     * Temporary helper method to display information in the onscreen TextView about the state of
-     * the pets database.
-     */
-    private void displayDatabaseInfo() {
-
-        // Perform this raw SQL query "SELECT * FROM pets"
-        // to get a Cursor that contains all rows from the pets table.
-
-        String[] projection =
-                {
-                        PetContract.PetEntry._ID,
-                        PetContract.PetEntry.COLUMN_PET_NAME,
-                        PetContract.PetEntry.COLUMN_PET_BREED,
-                        PetContract.PetEntry.COLUMN_PET_GENDER,
-                        PetContract.PetEntry.COLUMN_PET_WEIGHT
-                };
-
-        Cursor cursor = getContentResolver().query(CONTENT_URI, projection, null, null, null);
-
-        try {
-            // Find ListView to populate
-            ListView lvItems = (ListView) findViewById(R.id.list);
         // Setup cursor adapter using cursor from last step
-            PetCursorAdapter petAdapter = new PetCursorAdapter(this, cursor);
+         petAdapter = new PetCursorAdapter(this, null);
+
         // Attach cursor adapter to the ListView
-            lvItems.setAdapter(petAdapter);
+        petListView.setAdapter(petAdapter);
 
-            }
-            catch (Exception e)
-            {
-                Toast.makeText(this, "Error", Toast.LENGTH_LONG);
-            }
+        getSupportLoaderManager().initLoader(PET_LOADER, null, this);
 
-         finally {
-            // Always close the cursor when you're done reading from it. This releases all its
-            // resources and makes it invalid.
-            //cursor.close();
-        }
     }
 
     @Override
@@ -122,5 +96,34 @@ public class CatalogActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, @Nullable Bundle bundle) {
+        Uri baseUri;
+
+        // Perform this raw SQL query "SELECT * FROM pets"
+        // to get a Cursor that contains all rows from the pets table.
+
+        String[] projection =
+                {
+                        PetContract.PetEntry._ID,
+                        PetContract.PetEntry.COLUMN_PET_NAME,
+                        PetContract.PetEntry.COLUMN_PET_BREED
+                };
+
+        return new CursorLoader(this, CONTENT_URI, projection, null, null, null);
+
+
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
+        petAdapter.swapCursor(cursor);
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+        petAdapter.swapCursor(null);
     }
 }
