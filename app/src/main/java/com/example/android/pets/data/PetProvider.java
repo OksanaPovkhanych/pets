@@ -95,6 +95,8 @@ public class PetProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Cannot query unknown URI " + uri);
         }
+        cursor.setNotificationUri(getContext().getContentResolver(),uri);
+
         return cursor;
 
     }
@@ -142,6 +144,7 @@ public class PetProvider extends ContentProvider {
             Log.e(LOG_TAG, "Number of row is "+ id);
             // Once we know the ID of the new row in the table,
             // return the new URI with the ID appended to the end of it
+            getContext().getContentResolver().notifyChange(uri,null);
             return ContentUris.withAppendedId(uri, id);
         }
         catch (Exception e)
@@ -205,7 +208,13 @@ public class PetProvider extends ContentProvider {
         }
 
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        return db.update(PetContract.PetEntry.TABLE_NAME, values,selection,selectionArgs);
+        // Perform the update on the database and get the number of rows affected
+        int rowsUpdated = db.update(PetContract.PetEntry.TABLE_NAME, values, selection, selectionArgs);
+        if (rowsUpdated != 0) {
+
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return rowsUpdated;
        }
 
     @Override
@@ -222,7 +231,11 @@ public class PetProvider extends ContentProvider {
                 // Delete a single row given by the ID in the URI
                 selection = PetContract.PetEntry._ID + "=?";
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
-                return database.delete(PetContract.PetEntry.TABLE_NAME, selection, selectionArgs);
+                int rowDeleted = database.delete(PetContract.PetEntry.TABLE_NAME, selection, selectionArgs);
+                if (rowDeleted!=0){
+                    getContext().getContentResolver().notifyChange(uri,null);
+                }
+                return rowDeleted;
             default:
                 throw new IllegalArgumentException("Deletion is not supported for " + uri);
         }

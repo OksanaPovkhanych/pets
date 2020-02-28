@@ -62,4 +62,8 @@
     <string name="editor_insert_pet_successful">Insert is sucessfull.</string>
     <string name="empty_view_subtitle_text">Get started by adding a pet</string>
     <string name="empty_view_title_text">It\'s a bit lonely here...</string>
+    <string name="add_pet">Add a pet</string>
+    <string name="edit_pet">Edit pet</string>
+    <string name="editor_update_pet_failed">Failed to update pet</string>
+    <string name="editor_update_pet_successful">Pet updated succesfully</string>
 </resources>
