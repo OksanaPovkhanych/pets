@@ -43,6 +43,7 @@ import static com.example.android.pets.data.PetContract.PetEntry.CONTENT_URI;
 public class CatalogActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     private PetCursorAdapter petAdapter;
     private static  final int PET_LOADER = 1;
+    private Uri currentPetUri = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +61,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(com.example.android.pets.CatalogActivity.this, EditorActivity.class);
-                Uri currentPetUri = ContentUris.withAppendedId(CONTENT_URI,id);
+                currentPetUri = ContentUris.withAppendedId(CONTENT_URI,id);
                 intent.setData(currentPetUri);
                 startActivity(intent);
             }
@@ -112,7 +113,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, @Nullable Bundle bundle) {
-
+        Uri baseUri;
         // Perform this raw SQL query "SELECT * FROM pets"
         // to get a Cursor that contains all rows from the pets table.
 
